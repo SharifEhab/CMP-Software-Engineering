@@ -1,18 +1,18 @@
 function fetchEmployees() {
-  fetch('http://localhost:3000/api/v1/employee')
-    .then(response => response.json())
-    .then(data => {
-      const tableBody = document.getElementById('dataTable')
-      tableBody.innerHTML = ''
-      const list = data.data
+  fetch('http://localhost:3000/api/v1/employee') //fetch data from BE
+    .then(response => response.json()) //convert response to json
+    .then(data => { 
+      const tableBody = document.getElementById('dataTable') //get table body
+      tableBody.innerHTML = '' //clear table body
+      const list = data.data //get data from response
       list.forEach(item => {
-        const row = document.createElement('tr')
-        const idCell = document.createElement('td')
-        idCell.textContent = item.id
-        row.appendChild(idCell)
+        const row = document.createElement('tr') //create row
+        const idCell = document.createElement('td') //create cell
+        idCell.textContent = item.id 
+        row.appendChild(idCell) 
 
-        const nameCell = document.createElement('td')
-        nameCell.textContent = item.name
+        const nameCell = document.createElement('td') 
+        nameCell.textContent = item.name 
         row.appendChild(nameCell)
 
         const deleteCell = document.createElement('td')
@@ -38,7 +38,7 @@ document.getElementById('submitButton').addEventListener('click', createEmployee
 document.getElementById('dataTable').addEventListener('click', function (event) {
   if (event.target && event.target.nodeName == "BUTTON") {
     deleteEmployee(event.target.parentNode.parentNode.firstChild.textContent);
-  }
+  } // EXPLAIN : event.target is the clicked element, event.target.nodeName is the name of the clicked element which is supposed to be 'BUTTON'
 });
 
 // TODO
@@ -72,7 +72,7 @@ function createEmployee (){
 }
 
 // TODO
-function deleteEmployee (){
+function deleteEmployee (id){
   // get id
   // send id to BE
   // call fetchEmployees
