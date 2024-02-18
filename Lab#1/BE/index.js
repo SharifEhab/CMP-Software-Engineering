@@ -4,8 +4,8 @@ const app = express()
 const cors = require('cors')
 
 // Body parser
-app.use(express.json())
-app.use(cors())
+app.use(express.json()) //middleware for parsing json data
+app.use(cors()) //middleware for enabling CORS     
 
 
 const employeeRoutes = require('./routes/employee')

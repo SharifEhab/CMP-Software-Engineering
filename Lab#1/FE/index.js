@@ -31,15 +31,44 @@ function fetchEmployees() {
 
 // TODO
 // add event listener to submit button
+document.getElementById('submitButton').addEventListener('click', createEmployee);
 
 // TODO
 // add event listener to delete button
+document.getElementById('dataTable').addEventListener('click', function (event) {
+  if (event.target && event.target.nodeName == "BUTTON") {
+    deleteEmployee(event.target.parentNode.parentNode.firstChild.textContent);
+  }
+});
 
 // TODO
 function createEmployee (){
   // get data from input field
   // send data to BE
   // call fetchEmployees
+
+  const id = document.getElementById('employeeId').value;
+  const name = document.getElementById('employeeName').value;
+
+  fetch('http://localhost:3000/api/v1/employee', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ id, name })
+  })
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error('Failed to create employee');
+    })
+    .then(() => {
+      fetchEmployees();
+      document.getElementById('employeeId').value = '';
+      document.getElementById('employeeName').value = '';
+    })
+    .catch(error => console.error(error));
 }
 
 // TODO
@@ -47,6 +76,19 @@ function deleteEmployee (){
   // get id
   // send id to BE
   // call fetchEmployees
+  const response = fetch(`http://localhost:3000/api/v1/employee/${id}`, {
+    method: 'DELETE'
+  })
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error('Failed to delete employee');
+    })
+    .then(() => fetchEmployees())
+    .catch(error => console.error(error));
 }
 
 fetchEmployees()
+
+
