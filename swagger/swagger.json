@@ -131,6 +131,38 @@
           "bearerAuth" : [ ]
         } ]
       }
+    },
+    "/api/block_user" : {
+      "post" : {
+        "tags" : [ "User System" ],
+        "summary" : "Block a user",
+        "description" : "By passing in the appropriate options, current user can mark another user as blocked\n",
+        "operationId" : "blockUser",
+        "requestBody" : {
+          "description" : "User id to block",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/blockUserItem"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "user is blocked"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/UnauthorizedError"
+          },
+          "404" : {
+            "description" : "user is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
     }
   },
   "components" : {
