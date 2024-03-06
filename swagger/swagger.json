@@ -1,0 +1,204 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "Fox API",
+    "description" : "This is an API for Reddit simulation",
+    "contact" : {
+      "email" : "Sharif.Mohammad02@eng-st.cu.edu.eg"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://virtserver.swaggerhub.com/software_eng_fox/FoxAPI/1.0.0",
+    "description" : "SwaggerHub API Auto Mocking"
+  }, {
+    "url" : "https://virtserver.swaggerhub.com/SharifMohammad/FoxAPI/1.0.0",
+    "description" : "SwaggerHub API Auto Mocking"
+  } ],
+  "tags" : [ {
+    "name" : "User System",
+    "description" : "User system API"
+  }, {
+    "name" : "Listings",
+    "description" : "Dealing with posts"
+  }, {
+    "name" : "HomePage",
+    "description" : "HomePage APIs"
+  }, {
+    "name" : "Posts and Interactions",
+    "description" : "Posts and Interactions  API"
+  }, {
+    "name" : "Notifications",
+    "description" : "Notifications APIs"
+  }, {
+    "name" : "Search",
+    "description" : "Search APIs"
+  }, {
+    "name" : "Messages",
+    "description" : "Messages APIs"
+  }, {
+    "name" : "Community",
+    "description" : "Community and moderation API"
+  } ],
+  "paths" : {
+    "/signup" : {
+      "post" : {
+        "tags" : [ "User System" ],
+        "description" : "signup using email",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/signup_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully"
+          },
+          "400" : {
+            "description" : "there is an existing username use another one."
+          }
+        }
+      }
+    },
+    "/login" : {
+      "post" : {
+        "tags" : [ "User System" ],
+        "description" : "login using username and password",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/login_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "wrong username or password."
+          }
+        }
+      }
+    },
+    "/login/forget" : {
+      "post" : {
+        "tags" : [ "User System" ],
+        "summary" : "forget password or username",
+        "description" : "By passing in the appropriate options, when a user forget password or username he can still can log in using email.\n",
+        "operationId" : "forgetPasswordOrUsername",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/login_forget_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "success"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/UnauthorizedError"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "user is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "signup_body" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "description" : "valid email as karimmagzdy@gmail.com",
+            "format" : "uuid"
+          },
+          "password" : {
+            "type" : "string",
+            "description" : "a valid (at least 8) string containing at least one special character and at least one uppercase character.",
+            "format" : "uuid"
+          },
+          "username" : {
+            "type" : "string",
+            "description" : "a unique string as kikz this user name doesn't exist in the database.",
+            "format" : "uuid"
+          }
+        }
+      },
+      "login_body" : {
+        "type" : "object",
+        "properties" : {
+          "password" : {
+            "type" : "string",
+            "description" : "a valid (at least 8) string containing at least one special character and at least one uppercase character.",
+            "format" : "uuid"
+          },
+          "username" : {
+            "type" : "string",
+            "description" : "an existing username",
+            "format" : "uuid"
+          }
+        }
+      },
+      "inline_response_200" : {
+        "type" : "object",
+        "properties" : {
+          "token" : {
+            "type" : "string"
+          },
+          "expiresIn" : {
+            "type" : "integer",
+            "description" : "example 3600 (in seconds)"
+          }
+        }
+      },
+      "login_forget_body" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "example" : "shredan@gmail.com"
+          },
+          "operation" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "username" : {
+            "type" : "string",
+            "example" : "t2_AhmedLotfy02"
+          }
+        }
+      }
+    }
+  }
+}
