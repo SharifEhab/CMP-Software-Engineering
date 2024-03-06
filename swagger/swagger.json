@@ -45,29 +45,6 @@
     "description" : "Community and moderation API"
   } ],
   "paths" : {
-    "/signup" : {
-      "post" : {
-        "tags" : [ "User System" ],
-        "description" : "signup using email",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/signup_body"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "operation done successfully"
-          },
-          "400" : {
-            "description" : "there is an existing username use another one."
-          }
-        }
-      }
-    },
     "/login" : {
       "post" : {
         "tags" : [ "User System" ],
@@ -98,6 +75,29 @@
         }
       }
     },
+    "/signup" : {
+      "post" : {
+        "tags" : [ "User System" ],
+        "description" : "signup using email",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/signup_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully"
+          },
+          "400" : {
+            "description" : "there is an existing username use another one."
+          }
+        }
+      }
+    },
     "/login/forget" : {
       "post" : {
         "tags" : [ "User System" ],
@@ -118,10 +118,42 @@
             "description" : "success"
           },
           "401" : {
-            "$ref" : "#/components/responses/UnauthorizedError"
+            "description" : "Access token is missing or invalid"
           },
           "400" : {
             "description" : "bad request"
+          },
+          "404" : {
+            "description" : "user is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/report_user" : {
+      "post" : {
+        "tags" : [ "User System" ],
+        "summary" : "Report a User",
+        "description" : "Report a user to bring it to the attention of a Reddit admin.\n",
+        "operationId" : "reportUser",
+        "requestBody" : {
+          "description" : "User id to block",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/blockUserItem"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Report submitted successfully"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
           },
           "404" : {
             "description" : "user is not found"
@@ -153,10 +185,631 @@
             "description" : "user is blocked"
           },
           "401" : {
-            "$ref" : "#/components/responses/UnauthorizedError"
+            "description" : "Access token is missing or invalid"
           },
           "404" : {
             "description" : "user is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/me/friends/{username}" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "description" : "Get information about a specific 'friend', such as notes.",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "u/North-Situation4034"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeded get the friend information",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/userItem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "not found this friend"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/friend" : {
+      "post" : {
+        "tags" : [ "User System" ],
+        "description" : "this api is responisble for any relation between user and other user or between user and subreddit so in the prarameters there is type of relation that has to be one of [\"friend\", \"moderator\", \"moderator_invite\", \"contributor\", \"banned, \"muted\"], and some parameters related to this relation  bancontext and banmessage and banreason and attribute of duration that is in charge of duartion of this relation if we don't want to estimate certain duration set the duration to null",
+        "operationId" : "addFriend",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_friend_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "the request has been sent successfully"
+          },
+          "404" : {
+            "description" : "user is not found"
+          },
+          "401" : {
+            "description" : "unauthorized user token"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/unfriend" : {
+      "post" : {
+        "tags" : [ "User System" ],
+        "description" : "this api is complement of friend as it used to remove the relation between user and user or user and subreddit so in the parameters there is type of relation that has to be one of these types [\"friend\", \"moderator\", \"moderator_invite\", \"contributor\", \"banned, muted\"]\n",
+        "operationId" : "unfriend",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_unfriend_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "successfully removed the specified relation"
+          },
+          "404" : {
+            "description" : "user is not found"
+          },
+          "401" : {
+            "description" : "unauthorized user token"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/username_available" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "description" : "check if the username is available or no.",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "query",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "t2_AhmedLotfy02"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Avaliable",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "example" : "Avaliable"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Avaliable",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "example" : "Not Avaliable"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{username}/about" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "summary" : "get user about",
+        "description" : "get user about info\n",
+        "operationId" : "getAbout",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t2_AhmedLotfy02"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getAbout"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/user/{username}/overview" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "description" : "will return whatever posts, comments or replies a user has written before  \n",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t2_AhmedLotfy02"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        }, {
+          "name" : "t",
+          "in" : "query",
+          "description" : "one of (hour, day, week, month, year, all)",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "month"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeded get your overview",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "oneOf" : [ {
+                      "$ref" : "#/components/schemas/commentOrReply"
+                    }, {
+                      "$ref" : "#/components/schemas/post"
+                    } ]
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/user/{username}/submitted" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "description" : "will return whatever post a user has written before\n",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t2_AhmedLotfy02"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        }, {
+          "name" : "t",
+          "in" : "query",
+          "description" : "one of (hour, day, week, month, year, all)",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "month"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeeded get your posts",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getPosts"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/user/{username}/comments" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "description" : "will return whatever comments and replies a user has written before   \n",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t2_AhmedLotfy02"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        }, {
+          "name" : "t",
+          "in" : "query",
+          "description" : "one of (hour, day, week, month, year, all)",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "month"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeeded get your comments and replies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getLinks"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/user/{username}/upvoted" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "description" : "will return whatever posts you upvoted   \n",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t2_AhmedLotfy02"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeeded get your upvoted posts",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/user/{username}/downvoted" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "description" : "will return whatever posts you downvoted\n",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t2_AhmedLotfy02"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeeded get your downvoted posts",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/hot" : {
+      "get" : {
+        "tags" : [ "Listings" ],
+        "description" : "will return new posts in certain subreddit if name of passed subreddit if exist and if subreddit isn't passed will return from random subreddits \n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "funny"
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeded get the hot posts in the sub reddit",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getPosts"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "not found this subreddit"
           }
         },
         "security" : [ {
@@ -167,23 +820,837 @@
   },
   "components" : {
     "schemas" : {
-      "signup_body" : {
+      "communityRules" : {
         "type" : "object",
         "properties" : {
-          "email" : {
+          "title" : {
             "type" : "string",
-            "description" : "valid email as karimmagzdy@gmail.com",
+            "example" : "No Memes"
+          },
+          "description" : {
+            "type" : "string",
+            "example" : "no memes in this community"
+          }
+        }
+      },
+      "message" : {
+        "type" : "object",
+        "properties" : {
+          "from_sr_Or_u" : {
+            "type" : "string",
+            "example" : "1"
+          },
+          "to_sr_Or_u" : {
+            "type" : "string",
+            "example" : "1"
+          },
+          "subject" : {
+            "type" : "string",
+            "example" : "Image Processing Lab"
+          },
+          "text" : {
+            "type" : "string",
+            "example" : "Hi Eng.Ghatas i have a problem in my assignment."
+          },
+          "fromID" : {
+            "type" : "string",
+            "example" : "t3_lotfy"
+          },
+          "toID" : {
+            "type" : "string",
+            "example" : "t3_Ghatas"
+          }
+        }
+      },
+      "subreddit" : {
+        "required" : [ "AllowImg&LinksUploads", "AllowMultipleImagePerPost", "FAQs", "NFSW", "SuggestedCommentSort", "category", "createdAt", "description", "name", "postType", "privacyType", "region", "welcomeMesssage" ],
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : "string",
+            "example" : "this community is for gamers"
+          },
+          "name" : {
+            "type" : "string",
+            "example" : "Gamers Field"
+          },
+          "welcomeMessage" : {
+            "type" : "string",
+            "example" : "welcome to our community"
+          },
+          "region" : {
+            "type" : "string",
+            "example" : "africa"
+          },
+          "privacyType" : {
+            "type" : "string",
+            "example" : "public"
+          },
+          "NFSW" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "postType" : {
+            "type" : "number",
+            "example" : 0
+          },
+          "AllowImg&LinksUploads" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "AllowMultipleImagePerPost" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "SuggestedCommentSort" : {
+            "type" : "number",
+            "example" : 0
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "category" : {
+            "type" : "number",
+            "example" : 0
+          },
+          "FAQs" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/subreddit_FAQs"
+            }
+          },
+          "communityRules" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/communityRules"
+            }
+          }
+        }
+      },
+      "blockUserItem" : {
+        "required" : [ "userID" ],
+        "type" : "object",
+        "properties" : {
+          "userID" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }
+      },
+      "referLinkItem" : {
+        "required" : [ "category", "linkID" ],
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
             "format" : "uuid"
           },
-          "password" : {
+          "category" : {
             "type" : "string",
-            "description" : "a valid (at least 8) string containing at least one special character and at least one uppercase character.",
+            "example" : "Gaming"
+          }
+        }
+      },
+      "spamLinkItem" : {
+        "required" : [ "linkID", "type" ],
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "spamText" : {
+            "type" : "string",
+            "example" : "I found that this content is showing violence"
+          },
+          "type" : {
+            "type" : "string",
+            "example" : "violent content"
+          }
+        }
+      },
+      "commSettings" : {
+        "type" : "object",
+        "properties" : {
+          "region" : {
+            "type" : "string",
+            "example" : "Africa"
+          },
+          "nsfw" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "AllowMultipleImgPerPost" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "welcomeMessage" : {
+            "type" : "string",
+            "example" : "Hello, welcome to our community"
+          },
+          "privacyType" : {
+            "type" : "string",
+            "example" : "public"
+          },
+          "AllowImgAndLinksUploads" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "description" : {
+            "type" : "string",
+            "example" : "this is a community for fun!"
+          },
+          "postType" : {
+            "type" : "string",
+            "example" : "Any"
+          },
+          "suggestedCommentSort" : {
+            "type" : "string",
+            "example" : "old"
+          },
+          "spamsNumBeforeRemove" : {
+            "type" : "integer",
+            "example" : 15
+          },
+          "emailUserNameMention" : {
+            "type" : "boolean",
+            "example" : true
+          }
+        }
+      },
+      "savedCategoriesItem" : {
+        "required" : [ "savedCategories" ],
+        "type" : "object",
+        "properties" : {
+          "savedCategories" : {
+            "type" : "string",
+            "example" : "[\"Gaming\",\"Football\"]"
+          }
+        }
+      },
+      "postItem" : {
+        "type" : "object",
+        "properties" : {
+          "attachments" : {
+            "type" : "string",
+            "description" : "To access these files, access them as a link,\nexample: to show photo.jpg in html, src=\"/public/posts/files/photo.jpg\"\n",
+            "example" : "[\"photo.jpg\",\"code.cpp\"]"
+          },
+          "postID" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "votesCount" : {
+            "type" : "number",
+            "example" : 1
+          },
+          "userID" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "userName" : {
+            "type" : "string",
+            "description" : "the name of the user that will be displayed and if the user hover it will request by user id",
+            "example" : "u/North-Situation4034"
+          },
+          "communityID" : {
+            "type" : "string",
+            "description" : "maybe not sent",
+            "format" : "uuid"
+          },
+          "communityName" : {
+            "type" : "string",
+            "description" : "the name that will be displayed if the post realted to certain subreddit and if the user hover it, will request by the community id"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "text" : {
+            "type" : "string",
+            "example" : "This is a post text"
+          },
+          "title" : {
+            "type" : "string",
+            "example" : "This is a post title"
+          },
+          "nsfw" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "spoiler" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "flairID" : {
+            "type" : "string",
+            "example" : "id1"
+          },
+          "flairText" : {
+            "type" : "string",
+            "example" : "Hero"
+          },
+          "comments" : {
+            "type" : "array",
+            "description" : "these comments will displayed in case of post page or profile or we will get just the number of it in case of feed or search",
+            "items" : {
+              "$ref" : "#/components/schemas/commentItem"
+            }
+          }
+        }
+      },
+      "communitySummary" : {
+        "type" : "object",
+        "properties" : {
+          "image" : {
+            "type" : "string",
+            "example" : "icon.jpg"
+          },
+          "communityID" : {
+            "type" : "string",
+            "description" : "maybe not sent",
+            "format" : "uuid"
+          },
+          "description" : {
+            "type" : "string",
+            "example" : "This is a community description"
+          },
+          "name" : {
+            "type" : "string",
+            "example" : "This is a community name"
+          },
+          "category" : {
+            "type" : "string",
+            "example" : "Gaming"
+          }
+        }
+      },
+      "userItem" : {
+        "type" : "object",
+        "properties" : {
+          "avatar" : {
+            "type" : "string",
+            "description" : "To access these files, access them as a link,\nexample: to show photo.jpg in html, src=\"/public/users/files/photo.jpg\"\n",
+            "example" : "photo.jpg"
+          },
+          "userID" : {
+            "type" : "string",
             "format" : "uuid"
           },
           "username" : {
             "type" : "string",
-            "description" : "a unique string as kikz this user name doesn't exist in the database.",
+            "example" : "/u/moaz"
+          }
+        }
+      },
+      "userItemForSearch" : {
+        "type" : "object",
+        "properties" : {
+          "avatar" : {
+            "type" : "string",
+            "description" : "To access these files, access them as a link,\nexample: to show photo.jpg in html, src=\"/public/users/files/photo.jpg\"\n",
+            "example" : "photo.jpg"
+          },
+          "userID" : {
+            "type" : "string",
+            "description" : "the id that will be used if the user redirected to this user page or requested to follow it",
             "format" : "uuid"
+          },
+          "username" : {
+            "type" : "string",
+            "example" : "/u/moaz"
+          },
+          "totalKarmas" : {
+            "type" : "integer"
+          },
+          "about" : {
+            "type" : "string",
+            "description" : "this is about of the user that he did wrote in his profile and it is desplayed in search results if it's exist"
+          }
+        }
+      },
+      "passCommentId" : {
+        "required" : [ "CommentID" ],
+        "type" : "object",
+        "properties" : {
+          "CommentID" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }
+      },
+      "passUserId" : {
+        "required" : [ "userID" ],
+        "type" : "object",
+        "properties" : {
+          "userID" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }
+      },
+      "getPosts" : {
+        "required" : [ "data", "kind" ],
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/getPosts_data"
+          }
+        }
+      },
+      "editItems" : {
+        "required" : [ "linkId" ],
+        "type" : "object",
+        "properties" : {
+          "linkId" : {
+            "type" : "string",
+            "example" : "t3_54148d012f459b337e2382ce"
+          },
+          "text" : {
+            "type" : "string",
+            "example" : "This is a text"
+          }
+        }
+      },
+      "commentPostReplyCommentItems" : {
+        "required" : [ "linkId" ],
+        "type" : "object",
+        "properties" : {
+          "linkId" : {
+            "type" : "string",
+            "example" : "t3_54148d012f459b337e2382ce"
+          },
+          "text" : {
+            "type" : "string",
+            "example" : "This is a text"
+          }
+        }
+      },
+      "getLinks" : {
+        "required" : [ "data", "kind" ],
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/getLinks_data"
+          }
+        }
+      },
+      "linkItem" : {
+        "required" : [ "communityID", "createdAt", "linkID", "text", "userID", "votesCount" ],
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "votesCount" : {
+            "type" : "number",
+            "example" : 45
+          },
+          "userID" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "communityID" : {
+            "type" : "string",
+            "description" : "maybe not sent",
+            "format" : "uuid"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "text" : {
+            "type" : "string",
+            "example" : "This is a post text"
+          }
+        }
+      },
+      "userPrefs" : {
+        "type" : "object",
+        "properties" : {
+          "numComments" : {
+            "type" : "boolean",
+            "description" : "limit num of comments to see in post",
+            "example" : false
+          },
+          "threadedMessages" : {
+            "type" : "boolean",
+            "description" : "Show message conversations in the inbox or not",
+            "example" : false
+          },
+          "showLinkFlair" : {
+            "type" : "boolean",
+            "description" : "show the flair of the post",
+            "example" : false
+          },
+          "countryCode" : {
+            "type" : "string",
+            "example" : "PS"
+          },
+          "emailCommentReply" : {
+            "type" : "boolean",
+            "description" : "send email to user if a reply is made",
+            "example" : false
+          },
+          "emailUpvoteComment" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "emailMessages" : {
+            "type" : "boolean",
+            "description" : "send mail to user if a meesage is send",
+            "example" : false
+          },
+          "emailUnsubscribeAll" : {
+            "type" : "boolean",
+            "description" : "unsubscribe from all emails",
+            "example" : false
+          },
+          "emailUpvotePost" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "emailUsernameMention" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "emailUserNewFollower" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "emailPostReply" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "emailPrivateMessage" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "over18" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "newwindow" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "labelNsfw" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "liveOrangeReds" : {
+            "type" : "boolean",
+            "description" : "send message notifaction in my browser",
+            "example" : false
+          },
+          "markMessageRead" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "enableFollwers" : {
+            "type" : "boolean",
+            "description" : "do not allow people to follow the user, if disabled",
+            "example" : false
+          },
+          "publicVotes" : {
+            "type" : "boolean",
+            "description" : "if true, no. of votes is showed",
+            "example" : false
+          },
+          "showLocationBasedRecommendations" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "searchIncludeOver18" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "defaultCommentSort" : {
+            "type" : "string",
+            "example" : "best"
+          },
+          "langauge" : {
+            "type" : "string",
+            "example" : "en"
+          }
+        }
+      },
+      "getAbout" : {
+        "required" : [ "data", "kind" ],
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/aboutItem"
+            }
+          }
+        }
+      },
+      "aboutItem" : {
+        "type" : "object",
+        "properties" : {
+          "avatar" : {
+            "type" : "string",
+            "description" : "To access these files, access them as a link,\nexample: to show photo.jpg in html, src=\"/public/users/files/photo.jpg\"\n",
+            "example" : "photo.jpg"
+          },
+          "prefShowTrending" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "isBanned" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "isMuted" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "isBlocked" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "verified" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "newModmailExists" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "userId" : {
+            "type" : "string",
+            "example" : "dgsfs5fafd6"
+          },
+          "canCreateSubreddit" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "over18" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "isMod" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "hasVerifiedEmail" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "created" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "name" : {
+            "type" : "string",
+            "example" : "shredan"
+          },
+          "inboxCount" : {
+            "type" : "number",
+            "example" : 12
+          },
+          "totalKarma" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "linkKarma" : {
+            "type" : "number",
+            "example" : 1
+          },
+          "hasSubscribed" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "acceptFollowers" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "commentKarma" : {
+            "type" : "number",
+            "example" : 1
+          },
+          "passwordSet" : {
+            "type" : "boolean",
+            "description" : "password reset in case you're signing in normally without using gmail.",
+            "example" : false
+          },
+          "hasModMail" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "email" : {
+            "type" : "string",
+            "example" : "shredan@gmail.com"
+          }
+        }
+      },
+      "resetPassword" : {
+        "required" : [ "confirmNewPassword", "currentPassword", "newPassword" ],
+        "type" : "object",
+        "properties" : {
+          "currentPassword" : {
+            "type" : "string",
+            "example" : "eghh433w"
+          },
+          "newPassword" : {
+            "type" : "string",
+            "example" : "gy76563rc"
+          },
+          "confirmNewPassword" : {
+            "type" : "string",
+            "example" : "gy76563rc"
+          }
+        }
+      },
+      "commentOrReply" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/commentOrReply_inner"
+        }
+      },
+      "post" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/post_inner"
+        }
+      },
+      "subreddits" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/subreddits_inner"
+        }
+      },
+      "getComponents" : {
+        "type" : "array",
+        "items" : {
+          "oneOf" : [ {
+            "$ref" : "#/components/schemas/userItemForSearch"
+          }, {
+            "$ref" : "#/components/schemas/postItem"
+          }, {
+            "$ref" : "#/components/schemas/subredditItem"
+          }, {
+            "$ref" : "#/components/schemas/commentItem"
+          } ]
+        }
+      },
+      "subredditItem" : {
+        "type" : "object",
+        "properties" : {
+          "communityID" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "communityName" : {
+            "type" : "string",
+            "description" : "the name that will be displayed",
+            "example" : "r/teslamotors"
+          },
+          "communityIcon" : {
+            "type" : "string"
+          },
+          "communityDescription" : {
+            "type" : "string"
+          },
+          "membersCount" : {
+            "type" : "integer"
+          }
+        }
+      },
+      "postItemForSearchComments" : {
+        "type" : "object",
+        "properties" : {
+          "postID" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "votesCount" : {
+            "type" : "number",
+            "example" : 1
+          },
+          "userName" : {
+            "type" : "string",
+            "description" : "this is th user name will be displayed"
+          },
+          "userId" : {
+            "type" : "string",
+            "description" : "this is id that will be put in the request body if the user hover the user name",
+            "format" : "uuid"
+          },
+          "subredditName" : {
+            "type" : "string",
+            "description" : "the subreddit name that will be displayed in the search results"
+          },
+          "subredditID" : {
+            "type" : "string",
+            "description" : "this is id that will be put in the request body if the user hover the subreddit name",
+            "format" : "uuid"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "text" : {
+            "type" : "string",
+            "example" : "This is a post text"
+          },
+          "title" : {
+            "type" : "string",
+            "example" : "This is a post title"
+          },
+          "nsfw" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "spoiler" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "commentsNum" : {
+            "type" : "integer",
+            "description" : "only what we need is the number of commments as the all comments doesn't appear until request for the post"
+          }
+        }
+      },
+      "commentItem" : {
+        "type" : "object",
+        "properties" : {
+          "commentId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "commentText" : {
+            "type" : "string"
+          },
+          "votesCount" : {
+            "type" : "integer",
+            "description" : "the subtraction of upVotes - downvotes"
+          },
+          "createdAt" : {
+            "type" : "integer"
+          },
+          "editedAt" : {
+            "type" : "integer",
+            "description" : "will contain the time of last date or null if it wasn't edited"
+          },
+          "post" : {
+            "$ref" : "#/components/schemas/postItemForSearchComments"
+          },
+          "user" : {
+            "$ref" : "#/components/schemas/userItem"
           }
         }
       },
@@ -214,6 +1681,26 @@
           }
         }
       },
+      "signup_body" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "description" : "valid email as karimmagzdy@gmail.com",
+            "format" : "uuid"
+          },
+          "password" : {
+            "type" : "string",
+            "description" : "a valid (at least 8) string containing at least one special character and at least one uppercase character.",
+            "format" : "uuid"
+          },
+          "username" : {
+            "type" : "string",
+            "description" : "a unique string as kikz this user name doesn't exist in the database.",
+            "format" : "uuid"
+          }
+        }
+      },
       "login_forget_body" : {
         "type" : "object",
         "properties" : {
@@ -230,6 +1717,277 @@
             "example" : "t2_AhmedLotfy02"
           }
         }
+      },
+      "api_friend_body" : {
+        "type" : "object",
+        "properties" : {
+          "bancontext" : {
+            "type" : "string",
+            "description" : "this is the full name of the target user (receiver)",
+            "example" : "t2_54148d012f459b337e2382ce"
+          },
+          "ban_message" : {
+            "type" : "string"
+          },
+          "ban_reason" : {
+            "type" : "string"
+          },
+          "duration" : {
+            "type" : "integer",
+            "description" : "the duration that is the relation will take place"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "this is the name of the current user or subreddit (sender)",
+            "example" : "u/north_Situation2810"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "it's one of these values [\"friend\", \"moderator\", \"moderator_invite\", \"contributor\", \"banned, muted\"]\n"
+          }
+        }
+      },
+      "api_unfriend_body" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "the id of the receiver",
+            "example" : "t2_54148d012f459b337e2382ce"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "the name of the current user (sender)",
+            "example" : "u/north_Situation2810"
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "it's one of these values [\"friend\", \"moderator\", \"moderator_invite\", \"contributor\", \"banned, muted\"]\n"
+          }
+        }
+      },
+      "inline_response_200_1" : {
+        "type" : "object",
+        "properties" : {
+          "postArr" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/postItem"
+            }
+          }
+        }
+      },
+      "subreddit_FAQs" : {
+        "type" : "object",
+        "properties" : {
+          "question" : {
+            "type" : "string",
+            "example" : "who is nabil"
+          },
+          "answer" : {
+            "type" : "string",
+            "example" : "he is a type of fossils"
+          }
+        }
+      },
+      "getPosts_data" : {
+        "type" : "object",
+        "properties" : {
+          "dist" : {
+            "type" : "integer"
+          },
+          "children" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/postItem"
+            }
+          }
+        }
+      },
+      "getLinks_data" : {
+        "type" : "object",
+        "properties" : {
+          "dist" : {
+            "type" : "integer"
+          },
+          "children" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/linkItem"
+            }
+          }
+        }
+      },
+      "commentOrReply_inner" : {
+        "type" : "object",
+        "properties" : {
+          "pointNumber" : {
+            "type" : "number"
+          },
+          "data" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "example" : "t1_54148d012f459b337e2382ce"
+              },
+              "text" : {
+                "type" : "string",
+                "example" : "This is a text!"
+              },
+              "createdAt" : {
+                "type" : "string",
+                "format" : "date-time"
+              },
+              "commentsNum" : {
+                "type" : "number",
+                "example" : 45
+              }
+            }
+          }
+        }
+      },
+      "post_inner" : {
+        "type" : "object",
+        "properties" : {
+          "postTitle" : {
+            "type" : "string"
+          },
+          "postVotes" : {
+            "type" : "number"
+          },
+          "data" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "example" : "t1_54148d012f459b337e2382ce"
+              },
+              "text" : {
+                "type" : "string",
+                "example" : "This is a text!"
+              },
+              "createdAt" : {
+                "type" : "string",
+                "format" : "date-time"
+              },
+              "commentsNum" : {
+                "type" : "number",
+                "example" : 45
+              }
+            }
+          }
+        }
+      },
+      "subreddits_inner" : {
+        "type" : "object",
+        "properties" : {
+          "communityId" : {
+            "type" : "string",
+            "example" : "t1_54148d012f459b337e2382ce"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "memberCount" : {
+            "type" : "number",
+            "example" : 552
+          },
+          "rank" : {
+            "type" : "number"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "icon" : {
+            "type" : "string",
+            "description" : "To access these files, access them as a link,\nexample: to show photo.jpg in html, src=\"/public/users/files/photo.jpg\"\n",
+            "example" : "photo.jpg"
+          },
+          "banner" : {
+            "type" : "string",
+            "description" : "To access these files, access them as a link,\nexample: to show photo.jpg in html, src=\"/public/users/files/photo.jpg\"\n",
+            "example" : "photo.jpg"
+          },
+          "communityRules" : {
+            "type" : "object",
+            "properties" : {
+              "title" : {
+                "type" : "string"
+              },
+              "textDescription" : {
+                "type" : "string",
+                "example" : "This is a text!"
+              }
+            }
+          },
+          "FAQs" : {
+            "type" : "object",
+            "properties" : {
+              "question" : {
+                "type" : "string"
+              },
+              "answer" : {
+                "type" : "string"
+              }
+            }
+          },
+          "communityOptions" : {
+            "type" : "object",
+            "properties" : {
+              "privacyType" : {
+                "type" : "string"
+              },
+              "region" : {
+                "type" : "string"
+              },
+              "postType" : {
+                "type" : "string"
+              },
+              "allowImgLinkUploads" : {
+                "type" : "boolean"
+              },
+              "suggestedCommentSort" : {
+                "type" : "string"
+              },
+              "allowMultipleImagePerPost" : {
+                "type" : "boolean"
+              },
+              "welcomeMessage" : {
+                "type" : "boolean"
+              },
+              "NSFW" : {
+                "type" : "boolean"
+              },
+              "emailUserNameMention" : {
+                "type" : "boolean"
+              },
+              "optionsDescription" : {
+                "type" : "string"
+              }
+            }
+          },
+          "communityDescription" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "responses" : {
+      "UnauthorizedError" : {
+        "description" : "Access token is missing or invalid"
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "description" : "Standard Authorization header using the Bearer scheme. Example: \\\"bearer {JWTToken}\\\"\n",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
       }
     }
   }
