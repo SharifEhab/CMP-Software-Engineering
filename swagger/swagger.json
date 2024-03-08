@@ -816,6 +816,105 @@
           "bearerAuth" : [ ]
         } ]
       }
+    },
+    "/r/{subreddit}/search" : {
+      "get" : {
+        "tags" : [ "Search" ],
+        "description" : "will return posts in certain subreddit posts or subreddits or comments or users that are most related with the search query (q) if name of passed subreddit if exist and if subreddit isn't passed will return from random subreddits random posts \n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "description" : "the subreddit you want to search in",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "cars"
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "description" : "the query you search about it",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "tesla motors"
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "must one of this (relevance, hot, top, new, comments)",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "top"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "comma-delimited list of result types (sr, link, user)",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "link,user"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeded get the random posts in the sub reddit",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getComponents"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "not found this subreddit"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
     }
   },
   "components" : {
