@@ -41,13 +41,14 @@
     "name" : "Messages",
     "description" : "Messages APIs"
   }, {
-    "name" : "Community",
+    "name" : "Moderation",
     "description" : "Community and moderation API"
   } ],
   "paths" : {
     "/login" : {
       "post" : {
         "tags" : [ "User System" ],
+        "summary" : "login to account",
         "description" : "login using username and password",
         "requestBody" : {
           "content" : {
@@ -78,7 +79,8 @@
     "/signup" : {
       "post" : {
         "tags" : [ "User System" ],
-        "description" : "signup using email",
+        "summary" : "create new account",
+        "description" : "signup using email and password",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -101,7 +103,7 @@
     "/login/forget" : {
       "post" : {
         "tags" : [ "User System" ],
-        "summary" : "forget password or username",
+        "summary" : "change password or username",
         "description" : "By passing in the appropriate options, when a user forget password or username he can still can log in using email.\n",
         "operationId" : "forgetPasswordOrUsername",
         "requestBody" : {
@@ -132,44 +134,12 @@
         } ]
       }
     },
-    "/report_user" : {
-      "post" : {
-        "tags" : [ "User System" ],
-        "summary" : "Report a User",
-        "description" : "Report a user to bring it to the attention of a Reddit admin.\n",
-        "operationId" : "reportUser",
-        "requestBody" : {
-          "description" : "User id to block",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/blockUserItem"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "Report submitted successfully"
-          },
-          "401" : {
-            "description" : "Access token is missing or invalid"
-          },
-          "404" : {
-            "description" : "user is not found"
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ ]
-        } ]
-      }
-    },
     "/api/block_user" : {
       "post" : {
         "tags" : [ "User System" ],
-        "summary" : "Block a user",
+        "summary" : "Block account",
         "description" : "By passing in the appropriate options, current user can mark another user as blocked\n",
-        "operationId" : "blockUser",
+        "operationId" : "blockAccount",
         "requestBody" : {
           "description" : "User id to block",
           "content" : {
@@ -182,48 +152,13 @@
         },
         "responses" : {
           "200" : {
-            "description" : "user is blocked"
+            "description" : "Account is blocked"
           },
           "401" : {
             "description" : "Access token is missing or invalid"
           },
           "404" : {
-            "description" : "user is not found"
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ ]
-        } ]
-      }
-    },
-    "/api/v1/me/friends/{username}" : {
-      "get" : {
-        "tags" : [ "User System" ],
-        "description" : "Get information about a specific 'friend', such as notes.",
-        "parameters" : [ {
-          "name" : "username",
-          "in" : "path",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "type" : "string",
-            "example" : "u/North-Situation4034"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "succeded get the friend information",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/userItem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "not found this friend"
+            "description" : "Account is not found"
           }
         },
         "security" : [ {
@@ -234,6 +169,7 @@
     "/api/friend" : {
       "post" : {
         "tags" : [ "User System" ],
+        "summary" : "Add friend request",
         "description" : "this api is responisble for any relation between user and other user or between user and subreddit so in the prarameters there is type of relation that has to be one of [\"friend\", \"moderator\", \"moderator_invite\", \"contributor\", \"banned, \"muted\"], and some parameters related to this relation  bancontext and banmessage and banreason and attribute of duration that is in charge of duartion of this relation if we don't want to estimate certain duration set the duration to null",
         "operationId" : "addFriend",
         "requestBody" : {
@@ -247,7 +183,7 @@
         },
         "responses" : {
           "200" : {
-            "description" : "the request has been sent successfully"
+            "description" : "friend request has been sent successfully"
           },
           "404" : {
             "description" : "user is not found"
@@ -264,6 +200,7 @@
     "/api/unfriend" : {
       "post" : {
         "tags" : [ "User System" ],
+        "summary" : "unfriend an account",
         "description" : "this api is complement of friend as it used to remove the relation between user and user or user and subreddit so in the parameters there is type of relation that has to be one of these types [\"friend\", \"moderator\", \"moderator_invite\", \"contributor\", \"banned, muted\"]\n",
         "operationId" : "unfriend",
         "requestBody" : {
@@ -291,9 +228,76 @@
         } ]
       }
     },
+    "/api/v1/me/friends/{username}" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "description" : "Get information about a specific 'friend', such as notes.",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "u/Abdelrahman_Ahmed"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Got the friend information Successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/userItem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "couldn't find friend"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "User System" ],
+        "summary" : "Delete friend",
+        "description" : "By passing in the appropriate options, the current user can delete a friend.\n",
+        "operationId" : "deleteAccount",
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "u/Abdelrahman_Ahmed"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Account is deleted"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "404" : {
+            "description" : "Account is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/username_available" : {
       "get" : {
         "tags" : [ "User System" ],
+        "summary" : "check if username taken or not",
         "description" : "check if the username is available or no.",
         "parameters" : [ {
           "name" : "username",
@@ -303,7 +307,7 @@
           "explode" : true,
           "schema" : {
             "type" : "string",
-            "example" : "t2_AhmedLotfy02"
+            "example" : "sharif29"
           }
         } ],
         "responses" : {
@@ -375,6 +379,7 @@
     "/user/{username}/overview" : {
       "get" : {
         "tags" : [ "User System" ],
+        "summary" : "get user overview",
         "description" : "will return whatever posts, comments or replies a user has written before  \n",
         "parameters" : [ {
           "name" : "username",
@@ -384,7 +389,7 @@
           "explode" : false,
           "schema" : {
             "type" : "string",
-            "example" : "t2_AhmedLotfy02"
+            "example" : "sharif29"
           }
         }, {
           "name" : "page",
@@ -470,7 +475,7 @@
           "explode" : false,
           "schema" : {
             "type" : "string",
-            "example" : "t2_AhmedLotfy02"
+            "example" : "sharif29"
           }
         }, {
           "name" : "page",
@@ -540,6 +545,7 @@
     "/user/{username}/comments" : {
       "get" : {
         "tags" : [ "User System" ],
+        "summary" : "get user comments",
         "description" : "will return whatever comments and replies a user has written before   \n",
         "parameters" : [ {
           "name" : "username",
@@ -549,7 +555,7 @@
           "explode" : false,
           "schema" : {
             "type" : "string",
-            "example" : "t2_AhmedLotfy02"
+            "example" : "sharif29"
           }
         }, {
           "name" : "page",
@@ -628,7 +634,7 @@
           "explode" : false,
           "schema" : {
             "type" : "string",
-            "example" : "t2_AhmedLotfy02"
+            "example" : "sharif29"
           }
         }, {
           "name" : "page",
@@ -696,7 +702,7 @@
           "explode" : false,
           "schema" : {
             "type" : "string",
-            "example" : "t2_AhmedLotfy02"
+            "example" : "sharif29"
           }
         }, {
           "name" : "page",
@@ -745,6 +751,149 @@
           },
           "400" : {
             "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/me" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "summary" : "get user identity",
+        "description" : "get user identity\n",
+        "operationId" : "getIdentity",
+        "responses" : {
+          "200" : {
+            "description" : "success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/userItem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/me/prefs" : {
+      "get" : {
+        "tags" : [ "User System" ],
+        "summary" : "get user preferences",
+        "description" : "get user preferences\n",
+        "operationId" : "getPref",
+        "responses" : {
+          "200" : {
+            "description" : "success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/userPrefs"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "User System" ],
+        "summary" : "user edit a account prefrences",
+        "description" : "user edit a account prefrencese\n",
+        "operationId" : "editPrefs",
+        "requestBody" : {
+          "description" : "prefs to be edited",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/userPrefs"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "prefs is edited"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/best" : {
+      "get" : {
+        "tags" : [ "Listings" ],
+        "description" : "will return new posts from random subreddits\n",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Found the best posts successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getPosts"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Can't find this subreddit"
           }
         },
         "security" : [ {
@@ -810,6 +959,1214 @@
           },
           "404" : {
             "description" : "not found this subreddit"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/new" : {
+      "get" : {
+        "tags" : [ "Listings" ],
+        "description" : "will return new posts in certain subreddit if name of passed subreddit if exist and if subreddit isn't passed will return from random subreddits \n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "cars"
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeded get the new posts in the sub reddit",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getPosts"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "not found this subreddit"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/top" : {
+      "get" : {
+        "tags" : [ "Listings" ],
+        "description" : "will return top posts in certain subreddit if name of passed subreddit if exist and if subreddit isn't passed will return from random subreddits \n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "cars"
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        }, {
+          "name" : "t",
+          "in" : "query",
+          "description" : "one of (hour, day, week, month, year, all)",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "month"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeded get the top posts in the sub reddit",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getPosts"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "not found this subreddit"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/random" : {
+      "get" : {
+        "tags" : [ "Listings" ],
+        "description" : "will return random posts in certain subreddit if name of passed subreddit if exist and if subreddit isn't passed will return from random subreddits \n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "cars"
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succeded get the random posts in the sub reddit",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/getPosts"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "not found this subreddit"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/trendingsearches" : {
+      "get" : {
+        "tags" : [ "HomePage" ],
+        "summary" : "get trending searches",
+        "description" : "get the trending searches.",
+        "responses" : {
+          "200" : {
+            "description" : "return a valid subreddits.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/subreddit"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "operation failed"
+          }
+        }
+      }
+    },
+    "/api/subscribe" : {
+      "post" : {
+        "tags" : [ "HomePage" ],
+        "summary" : "subscribe to a subreddit",
+        "description" : "subscribe (put action = sub) or unsubscribe (put action = unsub) to a subreddit.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_subscribe_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully"
+          },
+          "404" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/get_specific_category" : {
+      "get" : {
+        "tags" : [ "HomePage" ],
+        "summary" : "get specific category",
+        "description" : "get bunch of subreddits of specific category just pass the category name in the body and the index of the pagination.",
+        "parameters" : [ {
+          "name" : "category",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "Gaming"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "return an array of subreddits.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/subreddit"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        }
+      }
+    },
+    "/api/random_category" : {
+      "get" : {
+        "tags" : [ "HomePage" ],
+        "summary" : "get random category",
+        "description" : "get a random subreddits from a random categories",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "return an array of subreddits.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/subreddit"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        }
+      }
+    },
+    "/api/hide" : {
+      "post" : {
+        "tags" : [ "HomePage", "Posts and Interactions" ],
+        "summary" : "hide a Post",
+        "description" : "By passing in the appropriate options, current user can hide a certain link\n",
+        "operationId" : "hidePost",
+        "requestBody" : {
+          "description" : "Post id to be hidden",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_hide_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Post is hidden"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "Post is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/unhide" : {
+      "post" : {
+        "tags" : [ "HomePage", "Posts and Interactions" ],
+        "summary" : "unhide a post",
+        "description" : "By passing in the appropriate options, current user can unhide a certain link\n",
+        "operationId" : "unhidePost",
+        "requestBody" : {
+          "description" : "Post id to be unhidden",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_unhide_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Post is unhidden"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "Post is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/comment" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "user add a comment on a post",
+        "description" : "add a comment to an existing post\n",
+        "operationId" : "addComment",
+        "requestBody" : {
+          "description" : "post id to comment to",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/commentPostReplyCommentItems"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "comment is added"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/del" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "delete your post or comment",
+        "description" : "delete a link you've written before\n",
+        "operationId" : "deletePostComment",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_del_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "post or comment is deleted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_2"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "error in deletion"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/editusertext" : {
+      "patch" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "user edit a text on a post",
+        "description" : "edit what you write before\n",
+        "operationId" : "editUserText",
+        "requestBody" : {
+          "description" : "post id to be edited",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/editItems"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "text is edited"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "post not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/follow_post" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "follow (put action = true) or unfollow (put action = false) post",
+        "description" : "pass the post id and notifications will be sent to you.\n",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_follow_post_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "post is followed succesfully"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "post is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/api/info" : {
+      "get" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "Return a listing (posts and comments) of things in specific subreddit specified by their fullnames.",
+        "description" : "Return a listing of things specified by their fullnames. Only Links, Comments, and Subreddits are allowed.\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "said312f,t1_bobose425f"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number",
+            "example" : 4
+          }
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer",
+            "example" : 10
+          }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer",
+            "example" : 50
+          }
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "t3_234fds3,t3_abwo3er343425"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "oneOf" : [ {
+                      "$ref" : "#/components/schemas/commentOrReply"
+                    }, {
+                      "$ref" : "#/components/schemas/postItem"
+                    } ]
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "list is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/lock" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "lock a link",
+        "description" : "By passing in the appropriate options, moderator can prevents a post or new child comments from receiving new comments.\n",
+        "operationId" : "lockLink",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_lock_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "link is locked"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "link is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/unlock" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "unlock a link",
+        "description" : "By passing in the appropriate options, moderator can allow a post or comment to receive new comments.\n",
+        "operationId" : "unlockLink",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_unlock_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "link is unlock"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "link is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/marknsfw" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "marknsfw a link",
+        "description" : "By passing in the appropriate options, moderator can mark a link NSFW.\n",
+        "operationId" : "marknsfwLink",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_marknsfw_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "link is marknsfw"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "link is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/unmarknsfw" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "unmarknsfw a link",
+        "description" : "By passing in the appropriate options, moderator can remove the NSFW marking from a link.\n",
+        "operationId" : "unmarknsfwLink",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_unmarknsfw_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "link is unmarknsfw"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "link is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/report" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "report a link",
+        "description" : "By passing in the appropriate options, user can report a post.\n",
+        "operationId" : "reportLink",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_report_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "link is reported"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "link is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/save" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "save a community",
+        "description" : "By passing in the appropriate options, moderator can mark a link NSFW.\n",
+        "operationId" : "saveCommunity",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_save_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "comunity is saved"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/unsave" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "unsave a category",
+        "description" : "By passing in the appropriate options, moderator can allow a post or comment to receive new comments.\n",
+        "operationId" : "unsaveCategory",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_unsave_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "category is unsaved"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "category is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/saved_categories" : {
+      "get" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "get saved category",
+        "description" : "get saved categories",
+        "parameters" : [ {
+          "name" : "category",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "Gaming"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "return an array of subreddits.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/subreddit"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        }
+      }
+    },
+    "/api/sendreplaies/" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "description" : "send replaies to comments.",
+        "responses" : {
+          "200" : {
+            "description" : "replay is saved.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/message"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/set_suggested_sort" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "description" : "set sort type of comments in community.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_set_suggested_sort_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "202" : {
+            "description" : "operation done successfully"
+          },
+          "404" : {
+            "description" : "Subreddit ID is not found."
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/spoiler" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "spoiler a link",
+        "description" : "By passing in the appropriate options, moderator can mark a link spoiler.\n",
+        "operationId" : "spoilerLink",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_spoiler_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "link is spoiler"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "link is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/unspoiler" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "unspoiler a link",
+        "description" : "By passing in the appropriate options, moderator can mark a link unspoiler.\n",
+        "operationId" : "unspoilerLink",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_unspoiler_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "link is unspoiler"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "link is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/submit" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "summary" : "create a post",
+        "description" : "By passing in the appropriate options, current user can create a certain post, note that you should use formdata in this request not json\n",
+        "operationId" : "createPost",
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_submit_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "post is unsaved",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/postItem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/vote" : {
+      "post" : {
+        "tags" : [ "Posts and Interactions" ],
+        "description" : "upvote (dir=1) or downvote(dir=-1) or cancel your upvote(0) or cancel your downvote (dir=2) and use fullnames to detect the passed thing in body whether its comment or post or something else.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_vote_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully"
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/insights_count/{post}" : {
+      "get" : {
+        "tags" : [ "Posts and Interactions" ],
+        "description" : "by passing correct post id will return post insights",
+        "operationId" : "post insights",
+        "parameters" : [ {
+          "name" : "post",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "succedded return the insights count",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_3"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "post is not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
           }
         },
         "security" : [ {
@@ -915,6 +2272,1314 @@
           "bearerAuth" : [ ]
         } ]
       }
+    },
+    "/message/compose/" : {
+      "post" : {
+        "tags" : [ "Messages" ],
+        "description" : "send a message  (note : disable sending message from                      subreddit to another subreddit)\n",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/message"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully"
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/del_msg" : {
+      "post" : {
+        "tags" : [ "Messages" ],
+        "description" : "Delete messages from the recipient's view of their inbox.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_del_msg_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully"
+          },
+          "404" : {
+            "description" : "this messageID is not found"
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/message/inbox/" : {
+      "get" : {
+        "tags" : [ "Messages" ],
+        "description" : "get all inbox messages of user.",
+        "responses" : {
+          "200" : {
+            "description" : "return array of messages.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/message"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/report_msg" : {
+      "post" : {
+        "tags" : [ "Messages" ],
+        "description" : "report a message",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_report_msg_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully"
+          },
+          "404" : {
+            "description" : "this messageID is not found"
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/message/unread/" : {
+      "post" : {
+        "tags" : [ "Messages" ],
+        "description" : "make a message unread.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/message_unread_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "operation done successfully"
+          },
+          "404" : {
+            "description" : "this messageID is not found"
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/message/sent/" : {
+      "get" : {
+        "tags" : [ "Messages" ],
+        "description" : "get all message sent by user.",
+        "responses" : {
+          "200" : {
+            "description" : "return array of messages.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/message"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/read_all_messages" : {
+      "post" : {
+        "tags" : [ "Messages" ],
+        "description" : "make all messages read.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_read_all_messages_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "202" : {
+            "description" : "operation done successfully"
+          },
+          "404" : {
+            "description" : "Account ID is not found."
+          },
+          "500" : {
+            "description" : "operation failed"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/get_user_mentions" : {
+      "post" : {
+        "tags" : [ "Messages" ],
+        "summary" : "get user mentions",
+        "description" : "get user mentions\n",
+        "operationId" : "getUserMentions",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_get_user_mentions_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/inline_response_200_4"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "mentions not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/get_post_replies" : {
+      "post" : {
+        "tags" : [ "Messages" ],
+        "summary" : "get post replies",
+        "description" : "get all comments on your posts",
+        "operationId" : "getPostReplies",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_get_post_replies_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/inline_response_200_4"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "replies not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/get_comment_replies" : {
+      "post" : {
+        "tags" : [ "Messages" ],
+        "summary" : "get comment replies",
+        "description" : "get comment replies\n",
+        "operationId" : "getCommentReplies",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_get_comment_replies_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "comment replies is showed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/inline_response_200_4"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "replies not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/approve" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Approve a link or comment.\nIf the thing was removed, it will be re-inserted into appropriate listings. Any reports on the approved thing will be discarded.\n",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/passCommentId"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "succeded approve the link or comment"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/remove" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Remove a link, comment, or modmail message.\nIf the thing is a link, it will be removed from all subreddit listings. If the thing is a comment, it will be redacted and removed from all subreddit comment listings.\n",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_remove_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "succeded removed the link, comment or modmail"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/show_comment" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Mark a comment that it should not be collapsed because of crowd control.The comment could still be collapsed for other reasons.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/passCommentId"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Comment visibility edited successfully"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/api/accept_moderator_invite" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Accept an invite to moderate the specified subreddit.\nThe authenticated user must have been invited to moderate the subreddit by one of its current moderators.\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "cars"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "accepted the invitation"
+          },
+          "404" : {
+            "description" : "not found this subreddit or not invited to moderate this subreddit"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/api/leavemoderator" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Abdicate moderator status in a subreddit.\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "cars"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/passUserId"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "accepted the abdication"
+          },
+          "404" : {
+            "description" : "not found this subreddit"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/api/delete_sr_banner" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Remove the subreddit's custom mobile banner.\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "cars"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "deleted the sr banner"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/api/delete_sr_icon" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Remove the subreddit's custom mobile icon.\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "cars"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "deleted the sr icon"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/site_admin" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Create or configure a subreddit.\n",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_site_admin_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "succeeded configured the subreddit"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/[subreddit]/api/upload_sr_icon" : {
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "summary" : "upload community icon",
+        "description" : "By passing in the appropriate options, current user can upload community icon, note that you should use formdata in this request not json\n",
+        "operationId" : "uploadCommIcon",
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api_upload_sr_icon_body"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "icon is upload"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/about/edit" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "summary" : "get community settings",
+        "description" : "Get community settings\n",
+        "operationId" : "getCommSettings",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "settings are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/commSettings"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          },
+          "404" : {
+            "description" : "community is not found"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/subreddits/mine/moderator" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Get subreddits the user is moderator at.\n",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "communities are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/communitySummary"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "communities are not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/about/banned" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Get banned users in a community\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "users are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/userItem"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or users are not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "ban the user that is passed in request from subreddit passed in path\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/passUserId"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "successfully banned the user"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or user is not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/about/muted" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Get muted users in a community\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t5_imagepro"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number",
+            "example" : 4
+          }
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "users are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/userItem"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or users are not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Moderation" ],
+        "description" : "mute the user that passed in request from subreddit passed in path\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t5_imagepro"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/passUserId"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "successfully muted the user"
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or user is not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/about/moderators" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Get moderators users in a community\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t5_imagepro"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "users are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/userItem"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or users are not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/about/unmoderated" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Get unmoderated posts in a community\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t5_imagepro"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number"
+          },
+          "example" : 4
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "posts are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/postItem"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or posts are not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/about/reports" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Get reported posts in a community\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t5_imagepro"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number",
+            "example" : 4
+          }
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "posts are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/postItem"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or users are not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/about/spam" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Get Spam posts in a community\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t5_imagepro"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number",
+            "example" : 4
+          }
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "posts are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/postItem"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or users are not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/r/{subreddit}/about/modqueue" : {
+      "get" : {
+        "tags" : [ "Moderation" ],
+        "description" : "Get posts that require moderator review in a community.\n",
+        "parameters" : [ {
+          "name" : "subreddit",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "example" : "t5_imagepro"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "number",
+            "example" : 4
+          }
+        }, {
+          "name" : "count",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 10
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          },
+          "example" : 50
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "posts are sent in body",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/postItem"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "bad request"
+          },
+          "404" : {
+            "description" : "community or users are not found"
+          },
+          "401" : {
+            "description" : "Access token is missing or invalid"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/all_notifications" : {
+      "get" : {
+        "tags" : [ "Notifications" ],
+        "description" : "get all notifications",
+        "responses" : {
+          "200" : {
+            "description" : "Notifications updated successfully",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
     }
   },
   "components" : {
@@ -949,15 +3614,15 @@
           },
           "text" : {
             "type" : "string",
-            "example" : "Hi Eng.Ghatas i have a problem in my assignment."
+            "example" : "Hi Eng.mazen i have a problem in my assignment."
           },
           "fromID" : {
             "type" : "string",
-            "example" : "t3_lotfy"
+            "example" : "t3_salama"
           },
           "toID" : {
             "type" : "string",
-            "example" : "t3_Ghatas"
+            "example" : "t3_karim"
           }
         }
       },
@@ -1805,7 +4470,7 @@
         "properties" : {
           "email" : {
             "type" : "string",
-            "example" : "shredan@gmail.com"
+            "example" : "karim@gmail.com"
           },
           "operation" : {
             "type" : "boolean",
@@ -1813,7 +4478,7 @@
           },
           "username" : {
             "type" : "string",
-            "example" : "t2_AhmedLotfy02"
+            "example" : "karim2423"
           }
         }
       },
@@ -1876,6 +4541,365 @@
             "items" : {
               "$ref" : "#/components/schemas/postItem"
             }
+          }
+        }
+      },
+      "api_subscribe_body" : {
+        "type" : "object",
+        "properties" : {
+          "action" : {
+            "type" : "string",
+            "example" : "sub"
+          },
+          "sr_name" : {
+            "type" : "string",
+            "description" : "subreddit ID",
+            "example" : "programmingC++"
+          }
+        }
+      },
+      "api_hide_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_unhide_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_del_body" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "example" : "t3_asdad"
+          }
+        }
+      },
+      "inline_response_200_2" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        },
+        "description" : "post id/ comment id to be deleted"
+      },
+      "api_follow_post_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          },
+          "action" : {
+            "type" : "boolean",
+            "example" : true
+          }
+        }
+      },
+      "api_lock_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_unlock_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_marknsfw_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_unmarknsfw_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_report_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_save_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "programmingJava"
+          }
+        }
+      },
+      "api_unsave_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "programmingInC#"
+          }
+        }
+      },
+      "api_set_suggested_sort_body" : {
+        "type" : "object",
+        "properties" : {
+          "sr_name:" : {
+            "type" : "string",
+            "example" : "t5_imagepro"
+          },
+          "suggested_comment_sort" : {
+            "type" : "string",
+            "example" : "old"
+          }
+        }
+      },
+      "api_spoiler_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_unspoiler_body" : {
+        "type" : "object",
+        "properties" : {
+          "linkID" : {
+            "type" : "string",
+            "example" : "t3_tuut677t554"
+          }
+        }
+      },
+      "api_submit_body" : {
+        "type" : "object",
+        "properties" : {
+          "communityID" : {
+            "type" : "string",
+            "description" : "maybe not sent, example, t5_f5247d112f459a83712683e4",
+            "format" : "uuid"
+          },
+          "text" : {
+            "type" : "string",
+            "description" : "This is a post text"
+          },
+          "attachments" : {
+            "type" : "string",
+            "description" : "This parameter can be written multiple times to attach multiple atachments via upload, type of this parameter is file\n",
+            "format" : "binary"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "This is a post title"
+          },
+          "nsfw" : {
+            "type" : "boolean",
+            "description" : "Value [true]"
+          },
+          "spoiler" : {
+            "type" : "boolean",
+            "description" : "Value [false]"
+          },
+          "flairID" : {
+            "type" : "string",
+            "description" : "id1"
+          },
+          "flairText" : {
+            "type" : "string",
+            "description" : "Hero"
+          }
+        }
+      },
+      "api_vote_body" : {
+        "type" : "object",
+        "properties" : {
+          "postId" : {
+            "type" : "string",
+            "example" : "t3_54148d012f459b337e2382ce"
+          },
+          "dir" : {
+            "type" : "number",
+            "example" : 1
+          }
+        }
+      },
+      "inline_response_200_3" : {
+        "type" : "object",
+        "properties" : {
+          "insightsCount" : {
+            "type" : "integer",
+            "example" : 50
+          }
+        }
+      },
+      "api_del_msg_body" : {
+        "type" : "object",
+        "properties" : {
+          "msg_id:" : {
+            "type" : "string",
+            "example" : "t4_54148d012f459b337e2382ce"
+          }
+        }
+      },
+      "api_report_msg_body" : {
+        "type" : "object",
+        "properties" : {
+          "msg_id:" : {
+            "type" : "string",
+            "example" : "t4_54148d012f459b337e2382ce"
+          }
+        }
+      },
+      "message_unread_body" : {
+        "type" : "object",
+        "properties" : {
+          "msg_id:" : {
+            "type" : "string",
+            "example" : "t4_54148d012f459b337e2382ce"
+          }
+        }
+      },
+      "api_read_all_messages_body" : {
+        "type" : "object",
+        "properties" : {
+          "user_id:" : {
+            "type" : "string",
+            "example" : "t2_sharif"
+          }
+        }
+      },
+      "api_get_user_mentions_body" : {
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string",
+            "example" : "t2_AHmedLotfy02"
+          }
+        }
+      },
+      "apiget_user_mentions_data" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "example" : "t1_54148d012f459b337e2382ce"
+          },
+          "text" : {
+            "type" : "string",
+            "example" : "This is a text!"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "commentsNum" : {
+            "type" : "number",
+            "example" : 45
+          }
+        }
+      },
+      "inline_response_200_4" : {
+        "type" : "object",
+        "properties" : {
+          "postTitle" : {
+            "type" : "string"
+          },
+          "fromId" : {
+            "type" : "string"
+          },
+          "toId" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/apiget_user_mentions_data"
+          }
+        }
+      },
+      "api_get_post_replies_body" : {
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string",
+            "example" : "t2_AHmedLotfy02"
+          }
+        }
+      },
+      "api_get_comment_replies_body" : {
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string",
+            "example" : "t2_AHmedLotfy02"
+          }
+        }
+      },
+      "api_remove_body" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "spam" : {
+            "type" : "boolean",
+            "example" : true
+          }
+        }
+      },
+      "api_site_admin_body" : {
+        "type" : "object",
+        "properties" : {
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/commSettings"
+            }
+          }
+        }
+      },
+      "api_upload_sr_icon_body" : {
+        "type" : "object",
+        "properties" : {
+          "communityID" : {
+            "type" : "string",
+            "description" : "t5_f5247d112f459a83712683e4",
+            "format" : "uuid"
+          },
+          "attachments" : {
+            "type" : "string",
+            "description" : "Type of this parameter is file\n",
+            "format" : "binary"
           }
         }
       },
